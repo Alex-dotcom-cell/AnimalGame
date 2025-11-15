@@ -1,382 +1,864 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Animal Letter Game – Deutsch (web)</title>
-  <style>
-    :root{
-      --bg: #87cefa; /* BLUE_BG */
-      --black: #000;
-      --gray: #c8c8c8;
-      --dark-gray: #969696;
-      --box-size: 48px;
-      --letter-font-size: 32px;
-    }
-    html,body{height:100%; margin:0; font-family: Arial, Helvetica, sans-serif; background:var(--bg);}
-    .wrap{max-width:1400px; margin:18px auto; padding:12px;}
-    header{display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;}
-    header h1{margin:0; font-size:22px; color:#013a63;}
-    #startBtn{padding:10px 14px; background:#0066cc;color:white;border-radius:8px;border:none; cursor:pointer;}
-    .game-area{display:flex; gap:16px; align-items:flex-start;}
-    .left, .right{background:rgba(255,255,255,0.9); padding:12px; border-radius:10px; box-shadow:0 6px 18px rgba(0,0,0,0.08);}
-    .left{flex: 1 1 640px; min-width:640px;}
-    .right{width:360px;}
-    .animal-image{width:400px; height:400px; object-fit:contain; display:block; margin:6px auto;}
-    .boxes{display:flex; justify-content:center; gap:8px; margin:14px 0;}
-    .box{width:var(--box-size); height:var(--box-size); background:var(--gray); border:2px solid var(--black); display:flex; align-items:center; justify-content:center; font-size:var(--letter-font-size); font-weight:700;}
-    .alphabet{display:flex; flex-wrap:wrap; gap:8px; padding:12px; margin-top:8px;}
-    .letter-btn{width:40px;height:40px; background:var(--gray); border-radius:6px; border:1px solid #666; display:flex; align-items:center; justify-content:center; cursor:pointer; user-select:none;}
-    .letter-btn:hover{background:var(--dark-gray); color:white;}
-    .section-title{font-weight:700;color:#054f85;margin-bottom:8px;}
-    .preview{min-height:120px; padding:8px; font-size:14px; color:#222;}
-    .status{margin-top:8px; font-weight:600;}
-    canvas#particles{position:absolute; left:0; top:0; pointer-events:none;}
-    .footer{margin-top:10px; color:#333; font-size:14px;}
-    @media(max-width:1100px){
-      .game-area{flex-direction:column;}
-      .left{min-width:unset;}
-      .right{width:100%;}
-    }
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <header>
-      <h1>Animal Letter Game – Deutsch (web)</h1>
-      <div>
-        <button id="startBtn">Start / Играть</button>
-      </div>
-    </header>
-
-    <div style="position:relative;">
-      <!-- particle canvas -->
-      <canvas id="particles" width="1600" height="1200" style="width:100%;height:800px;"></canvas>
-
-      <div class="game-area">
-        <div class="left">
-          <div style="text-align:center;">
-            <img id="animalImg" class="animal-image" alt="animal">
-          </div>
-
-          <div class="section-title">Слово:</div>
-          <div id="boxes" class="boxes" aria-hidden="true"></div>
-
-          <div class="section-title">Алфавит (BIG / SMALL)</div>
-          <div id="alphabetBig" class="alphabet" aria-label="Большие буквы"></div>
-          <div id="alphabetSmall" class="alphabet" aria-label="Маленькие буквы" style="margin-top:10px;"></div>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Animal Letter Game – Deutsch</title>
+    <style>
+      :root {
+        --bg: #87cefa;
+        --black: #000;
+        --gray: #c8c8c8;
+        --dark-gray: #969696;
+        --box-size: 48px;
+        --letter-font-size: 32px;
+        --mobile-box-size: 40px;
+        --mobile-letter-font-size: 24px;
+      }
+      
+      html, body {
+        height: 100%;
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: var(--bg);
+        overflow-x: hidden;
+      }
+      
+      .wrap {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 12px;
+        box-sizing: border-box;
+      }
+      
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+      }
+      
+      header h1 {
+        margin: 0;
+        font-size: 22px;
+        color: #013a63;
+        flex: 1;
+        min-width: 200px;
+      }
+      
+      .controls-top {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      
+      .btn {
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+        transition: all 0.3s;
+      }
+      
+      .btn-primary {
+        background: #0066cc;
+        color: white;
+      }
+      
+      .btn-secondary {
+        background: #ff9900;
+        color: white;
+      }
+      
+      .btn-danger {
+        background: #cc3333;
+        color: white;
+      }
+      
+      .btn-success {
+        background: #00a86b;
+        color: white;
+      }
+      
+      .btn:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+      }
+      
+      .game-area {
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+      }
+      
+      .left, .right {
+        background: rgba(255, 255, 255, 0.9);
+        padding: 12px;
+        border-radius: 10px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+        box-sizing: border-box;
+      }
+      
+      .left {
+        flex: 1 1 640px;
+        min-width: 0;
+      }
+      
+      .right {
+        width: 360px;
+      }
+      
+      .animal-image {
+        max-width: 100%;
+        height: auto;
+        max-height: 400px;
+        object-fit: contain;
+        display: block;
+        margin: 6px auto;
+      }
+      
+      .boxes {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 14px 0;
+      }
+      
+      .box {
+        width: var(--box-size);
+        height: var(--box-size);
+        background: var(--gray);
+        border: 2px solid var(--black);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: var(--letter-font-size);
+        font-weight: 700;
+      }
+      
+      .alphabet {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 12px;
+        margin-top: 8px;
+        justify-content: center;
+      }
+      
+      .letter-btn {
+        width: 40px;
+        height: 40px;
+        background: var(--gray);
+        border-radius: 6px;
+        border: 1px solid #666;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        user-select: none;
+        font-size: 20px;
+        font-weight: bold;
+        transition: all 0.2s;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+      }
+      
+      .letter-btn:hover, .letter-btn:active {
+        background: var(--dark-gray);
+        color: white;
+      }
+      
+      .section-title {
+        font-weight: 700;
+        color: #054f85;
+        margin-bottom: 8px;
+        font-size: 18px;
+      }
+      
+      .preview {
+        min-height: 120px;
+        padding: 8px;
+        font-size: 14px;
+        color: #222;
+      }
+      
+      .status {
+        margin-top: 8px;
+        font-weight: 600;
+      }
+      
+      canvas#particles {
+        position: absolute;
+        left: 0;
+        top: 0;
+        pointer-events: none;
+        z-index: 10;
+      }
+      
+      .footer {
+        margin-top: 10px;
+        color: #333;
+        font-size: 14px;
+      }
+      
+      .sound-controls {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+        flex-wrap: wrap;
+      }
+      
+      .sound-btn {
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        background: white;
+        cursor: pointer;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      
+      .sound-btn.active {
+        background: #e0e0e0;
+      }
+      
+      /* Мобильные стили */
+      @media (max-width: 1100px) {
+        .game-area {
+          flex-direction: column;
+        }
+        
+        .right {
+          width: 100%;
+        }
+      }
+      
+      @media (max-width: 768px) {
+        .wrap {
+          padding: 8px;
+        }
+        
+        header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 10px;
+        }
+        
+        .controls-top {
+          width: 100%;
+          justify-content: space-between;
+        }
+        
+        header h1 {
+          font-size: 18px;
+        }
+        
+        .btn {
+          padding: 12px;
+          font-size: 16px;
+          margin-bottom: 5px;
+        }
+        
+        .left, .right {
+          padding: 10px;
+        }
+        
+        .animal-image {
+          max-height: 300px;
+        }
+        
+        .box {
+          width: var(--mobile-box-size);
+          height: var(--mobile-box-size);
+          font-size: var(--mobile-letter-font-size);
+        }
+        
+        .letter-btn {
+          width: 36px;
+          height: 36px;
+          font-size: 18px;
+        }
+        
+        .alphabet {
+          gap: 6px;
+          padding: 8px;
+        }
+        
+        .section-title {
+          font-size: 16px;
+        }
+        
+        .preview {
+          min-height: 100px;
+          font-size: 13px;
+        }
+        
+        .sound-controls {
+          flex-direction: column;
+        }
+        
+        .sound-btn {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+      
+      @media (max-width: 480px) {
+        .box {
+          width: 35px;
+          height: 35px;
+          font-size: 20px;
+        }
+        
+        .letter-btn {
+          width: 32px;
+          height: 32px;
+          font-size: 16px;
+        }
+        
+        .alphabet {
+          gap: 4px;
+        }
+        
+        .animal-image {
+          max-height: 250px;
+        }
+      }
+      
+      @media (max-width: 360px) {
+        .box {
+          width: 30px;
+          height: 30px;
+          font-size: 18px;
+        }
+        
+        .letter-btn {
+          width: 28px;
+          height: 28px;
+          font-size: 14px;
+        }
+        
+        .alphabet {
+          gap: 3px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <h1>Animal Letter Game – Deutsch</h1>
+        <div class="controls-top">
+          <button id="startBtn" class="btn btn-primary">Start / Играть</button>
+          <button id="undoBtn" class="btn btn-secondary" disabled>Отмена</button>
+          <button id="resetBtn" class="btn btn-danger">Сброс</button>
         </div>
+      </header>
 
-        <div class="right">
-          <div class="section-title">Информация</div>
-          <div class="preview">
-            <div><strong>Текущее слово:</strong> <span id="currentWordPreview">—</span></div>
-            <div><strong>Поставлено букв:</strong> <span id="placedCount">0</span></div>
-            <div class="status" id="message" style="color:#006600;"></div>
-          </div>
+      <div style="position: relative">
+        <!-- particle canvas -->
+        <canvas
+          id="particles"
+          width="1600"
+          height="1200"
+          style="width: 100%; height: 100%; position: absolute; top: 0; left: 0;"
+        ></canvas>
 
-          <div style="margin-top:14px;">
-            <div class="section-title">Управление</div>
-            <button id="nextBtn" style="padding:8px 12px; border-radius:8px; background:#00a86b; color:white; border:none; cursor:pointer;">Следующее слово</button>
-            <div style="margin-top:10px;">
-              <label><input id="muteBg" type="checkbox"> Отключить фон. музыку</label>
+        <div class="game-area">
+          <div class="left">
+            <div style="text-align: center">
+              <img id="animalImg" class="animal-image" alt="animal" />
             </div>
+
+            <div class="section-title">Слово:</div>
+            <div id="boxes" class="boxes" aria-hidden="true"></div>
+
+            <div class="section-title">Алфавит (BIG / SMALL)</div>
+            <div
+              id="alphabetBig"
+              class="alphabet"
+              aria-label="Большие буквы"
+            ></div>
+            <div
+              id="alphabetSmall"
+              class="alphabet"
+              aria-label="Маленькие буквы"
+              style="margin-top: 10px"
+            ></div>
           </div>
 
-          <div class="footer">
-            <p>Копия логики Pygame: кликай на буквы, чтобы заполнить клетки. Если буква не подходит — играет неправильный звук.</p>
+          <div class="right">
+            <div class="section-title">Информация</div>
+            <div class="preview">
+              <div>
+                <strong>Текущее слово:</strong>
+                <span id="currentWordPreview">—</span>
+              </div>
+              <div>
+                <strong>Поставлено букв:</strong>
+                <span id="placedCount">0</span> / <span id="totalLetters">0</span>
+              </div>
+              <div class="status" id="message"></div>
+            </div>
+
+            <div style="margin-top: 14px">
+              <div class="section-title">Управление</div>
+              <button
+                id="nextBtn"
+                class="btn btn-success"
+                style="width: 100%;"
+              >
+                Следующее слово
+              </button>
+              
+              <div class="section-title" style="margin-top: 15px;">Звук</div>
+              <div class="sound-controls">
+                <button id="soundToggle" class="sound-btn active">
+                  🔊 Звуки вкл
+                </button>
+                <button id="musicToggle" class="sound-btn active">
+                  🎵 Музыка вкл
+                </button>
+              </div>
+            </div>
+
+            <div class="footer">
+              <p>
+                Кликай на буквы, чтобы заполнить клетки. Если буква не подходит — играет неправильный звук.
+              </p>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-  </div>
+    <script>
+      // ==== Конфигурация ====
+      const ASSETS_DIR = "./assets";
 
-  <script>
-  // ==== Конфигурация ====
-  // Путь к папке с ассетами (от index.html)
-  const ASSETS_DIR = './assets';
+      // Алфавит
+      const lettersBig = Array.from(Array(26))
+        .map((_, i) => String.fromCharCode(65 + i))
+        .concat(["Ä", "Ö", "Ü", "ß"]);
+      const lettersSmall = Array.from(Array(26))
+        .map((_, i) => String.fromCharCode(97 + i))
+        .concat(["ä", "ö", "ü", "ß"]);
 
-  // Алфавит
-  const lettersBig = Array.from(Array(26)).map((_,i)=>String.fromCharCode(65+i)).concat(['Ä','Ö','Ü','ß']);
-  const lettersSmall = Array.from(Array(26)).map((_,i)=>String.fromCharCode(97+i)).concat(['ä','ö','ü','ß']);
+      // Список животных
+      const animals = [
+        { name: "Affe", img: "Affe.png" },
+        { name: "Katze", img: "Katze.png" },
+        { name: "Maus", img: "Maus.png" },
+        { name: "Dino", img: "Dino.png" },
+        { name: "Vogel", img: "Vogel.png" },
+        { name: "Esel", img: "Esel.png" },
+        { name: "Qualle", img: "Qualle.png" },
+        { name: "Osterhase", img: "Osterhase.png" },
+        { name: "Igel", img: "Igel.png" },
+        { name: "Tisch", img: "Tisch .png" },
+        { name: "Lampe", img: "Lampe.png" },
+        { name: "Gabel", img: "Gabel.png" },
+        { name: "Xylophon", img: "Xylophon.png" },
+        { name: "Junge", img: "Junde.png" },
+        { name: "Nase", img: "Nase.png" },
+        { name: "Sonne", img: "Sonne.png" },
+        { name: "Baum", img: "Baum.png" },
+        { name: "Pinsel", img: "Pinsel.png" },
+        { name: "Feder", img: "Feder.png" },
+        { name: "Uhr", img: "Uhr.png" },
+        { name: "Wolke", img: "Wolke.png" },
+        { name: "Rakete", img: "Rakete.png" },
+      ];
 
-  // Список животных и имён файлов (как в оригинале)
-  const animals = [
-    { name: "Affe", img: "Affe.png" },
-    { name: "Katze", img: "Katze.png" },
-    { name: "Maus", img: "Maus.png" },
-    { name: "Dino", img: "Dino.png" },
-    { name: "Vogel", img: "Vogel.png" },
-    { name: "Esel", img: "Esel.png" },
-    { name: "Qualle", img: "Qualle.png" },
-    { name: "Osterhase", img: "Osterhase.png" },
-    { name: "Igel", img: "Igel.png" },
-    { name: "Tisch", img: "Tisch .png" }, // оставлен как в твоём списке (обрати внимание на пробел)
-    { name: "Lampe", img: "Lampe.png" },
-    { name: "Gabel", img: "Gabel.png" },
-    { name: "Xylophon", img: "Xylophon.png" },
-    { name: "Junge", img: "Junde.png" }, // тоже оставлено как есть
-    { name: "Nase", img: "Nase.png" },
-    { name: "Sonne", img: "Sonne.png" },
-    { name: "Baum", img: "Baum.png" },
-    { name: "Pinsel", img: "Pinsel.png" },
-    { name: "Feder", img: "Feder.png" },
-    { name: "Uhr", img: "Uhr.png" },
-    { name: "Wolke", img: "Wolke.png" },
-    { name: "Rakete", img: "Rakete.png" }
-  ];
+      // Аудио
+      const audioBg = new Audio(ASSETS_DIR + "/background.wav");
+      audioBg.loop = true;
+      audioBg.volume = 0.2;
 
-  // Аудио
-  const audioBg = new Audio(ASSETS_DIR + '/background.wav');
-  audioBg.loop = true;
-  audioBg.volume = 0.2;
+      const sndFirework = new Audio(ASSETS_DIR + "/firework.wav");
+      const sndCorrect = new Audio(ASSETS_DIR + "/correct.wav");
+      const sndWrong = new Audio(ASSETS_DIR + "/wrong.wav");
 
-  const sndFirework = new Audio(ASSETS_DIR + '/firework.wav');
-  const sndCorrect = new Audio(ASSETS_DIR + '/correct.wav');
-  const sndWrong = new Audio(ASSETS_DIR + '/wrong.wav');
+      // ==== Состояние игры ====
+      let currentIndex = 0;
+      let currentWord = animals[currentIndex].name.split("");
+      let playerLetters = new Array(currentWord.length).fill("");
+      let showFullWord = false;
+      let fullWordStartTime = 0;
+      let particles = [];
+      let particlesRunning = false;
+      let actionHistory = []; // История действий для кнопки отмены
+      let soundsEnabled = true;
+      let musicEnabled = true;
+      let lastTapTime = 0; // Для предотвращения двойных нажатий
 
-  // ==== Состояние игры ====
-  let currentIndex = 0;
-  let currentWord = animals[currentIndex].name.split('');
-  let playerLetters = new Array(currentWord.length).fill('');
-  let showFullWord = false;
-  let fullWordStartTime = 0;
-  let particles = [];
-  let particlesRunning = false;
+      // DOM refs
+      const animalImg = document.getElementById("animalImg");
+      const boxesContainer = document.getElementById("boxes");
+      const alphabetBigDiv = document.getElementById("alphabetBig");
+      const alphabetSmallDiv = document.getElementById("alphabetSmall");
+      const currentWordPreview = document.getElementById("currentWordPreview");
+      const placedCount = document.getElementById("placedCount");
+      const totalLetters = document.getElementById("totalLetters");
+      const messageEl = document.getElementById("message");
+      const startBtn = document.getElementById("startBtn");
+      const nextBtn = document.getElementById("nextBtn");
+      const undoBtn = document.getElementById("undoBtn");
+      const resetBtn = document.getElementById("resetBtn");
+      const soundToggle = document.getElementById("soundToggle");
+      const musicToggle = document.getElementById("musicToggle");
 
-  // DOM refs
-  const animalImg = document.getElementById('animalImg');
-  const boxesContainer = document.getElementById('boxes');
-  const alphabetBigDiv = document.getElementById('alphabetBig');
-  const alphabetSmallDiv = document.getElementById('alphabetSmall');
-  const currentWordPreview = document.getElementById('currentWordPreview');
-  const placedCount = document.getElementById('placedCount');
-  const messageEl = document.getElementById('message');
-  const startBtn = document.getElementById('startBtn');
-  const nextBtn = document.getElementById('nextBtn');
-  const muteBg = document.getElementById('muteBg');
+      // Canvas particles
+      const canvas = document.getElementById("particles");
+      const ctx = canvas.getContext("2d");
 
-  // Canvas particles
-  const canvas = document.getElementById('particles');
-  const ctx = canvas.getContext('2d');
-
-  // Resize canvas to full page size of wrap region
-  function resizeCanvas(){
-    const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width;
-    canvas.height = rect.height;
-  }
-  window.addEventListener('resize', resizeCanvas);
-  resizeCanvas();
-
-  // ==== Инициализация UI ====
-  function renderAlphabet(){
-    alphabetBigDiv.innerHTML = '';
-    lettersBig.forEach(letter=>{
-      const b = document.createElement('div');
-      b.className = 'letter-btn';
-      b.textContent = letter;
-      b.dataset.letter = letter;
-      alphabetBigDiv.appendChild(b);
-    });
-    alphabetSmallDiv.innerHTML = '';
-    lettersSmall.forEach(letter=>{
-      const b = document.createElement('div');
-      b.className = 'letter-btn';
-      b.textContent = letter;
-      b.dataset.letter = letter;
-      alphabetSmallDiv.appendChild(b);
-    });
-  }
-
-  function renderBoxes(){
-    boxesContainer.innerHTML = '';
-    playerLetters.forEach((ch,i)=>{
-      const box = document.createElement('div');
-      box.className = 'box';
-      box.textContent = ch || '';
-      boxesContainer.appendChild(box);
-    });
-    currentWordPreview.textContent = currentWord.join('');
-    placedCount.textContent = playerLetters.filter(x=>x!=='').length;
-  }
-
-  function loadAnimalImage(){
-    const animal = animals[currentIndex];
-    const path = ASSETS_DIR + '/' + animal.img;
-    animalImg.src = path;
-    animalImg.onerror = ()=> {
-      // если картинка не найдена — показываем плейсхолдер
-      animalImg.alt = animal.name;
-      animalImg.style.background = '#fff';
-    };
-  }
-
-  // ==== Поведение клика по букве ====
-  function handleLetterClick(letter){
-    let placed = false;
-    for(let i=0;i<currentWord.length;i++){
-      if(playerLetters[i]==='' && currentWord[i] === letter){
-        playerLetters[i] = letter;
-        placed = true;
-        break;
+      // Адаптация размера canvas
+      function resizeCanvas() {
+        const container = document.querySelector('.wrap');
+        const rect = container.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
       }
-    }
-    if(placed){
-      playSound(sndCorrect);
-      messageEl.textContent = '✅ Правильно!';
-      messageEl.style.color = '#006600';
-    } else {
-      playSound(sndWrong);
-      messageEl.textContent = '❌ Неправильно!';
-      messageEl.style.color = '#990000';
-    }
-    renderBoxes();
-    checkFullWord();
-  }
 
-  function checkFullWord(){
-    if(playerLetters.every(ch=>ch!=='' ) && !showFullWord){
-      showFullWord = true;
-      fullWordStartTime = performance.now();
-      playSound(sndFirework);
-      startParticles();
-      // через 3 секунды — перейти к следующему слову
-      setTimeout(()=>{
-        stopParticles();
-        // advance index
+      window.addEventListener("resize", resizeCanvas);
+      window.addEventListener("load", resizeCanvas);
+      setTimeout(resizeCanvas, 300);
+
+      // ==== Инициализация UI ====
+      function renderAlphabet() {
+        alphabetBigDiv.innerHTML = "";
+        lettersBig.forEach((letter) => {
+          const b = document.createElement("div");
+          b.className = "letter-btn";
+          b.textContent = letter;
+          b.dataset.letter = letter;
+          b.setAttribute("role", "button");
+          b.setAttribute("aria-label", `Буква ${letter}`);
+          alphabetBigDiv.appendChild(b);
+        });
+        
+        alphabetSmallDiv.innerHTML = "";
+        lettersSmall.forEach((letter) => {
+          const b = document.createElement("div");
+          b.className = "letter-btn";
+          b.textContent = letter;
+          b.dataset.letter = letter;
+          b.setAttribute("role", "button");
+          b.setAttribute("aria-label", `Буква ${letter}`);
+          alphabetSmallDiv.appendChild(b);
+        });
+      }
+
+      function renderBoxes() {
+        boxesContainer.innerHTML = "";
+        playerLetters.forEach((ch, i) => {
+          const box = document.createElement("div");
+          box.className = "box";
+          box.textContent = ch || "";
+          box.setAttribute("aria-label", ch ? `Буква ${ch}` : "Пустая клетка");
+          boxesContainer.appendChild(box);
+        });
+        currentWordPreview.textContent = currentWord.join("");
+        placedCount.textContent = playerLetters.filter((x) => x !== "").length;
+        totalLetters.textContent = currentWord.length;
+        
+        // Обновление состояния кнопки отмены
+        undoBtn.disabled = actionHistory.length === 0;
+      }
+
+      function loadAnimalImage() {
+        const animal = animals[currentIndex];
+        const path = ASSETS_DIR + "/" + animal.img;
+        animalImg.src = path;
+        animalImg.alt = animal.name;
+        animalImg.onerror = () => {
+          animalImg.style.background = "#fff";
+        };
+      }
+
+      // ==== Поведение клика по букве ====
+      function handleLetterClick(letter) {
+        // Защита от быстрых повторных нажатий (300ms)
+        const currentTime = new Date().getTime();
+        const timeSinceLastTap = currentTime - lastTapTime;
+        if (timeSinceLastTap < 300) return;
+        lastTapTime = currentTime;
+        
+        let placed = false;
+        let placedIndex = -1;
+        
+        // Ищем первую пустую позицию, куда подходит эта буква
+        for (let i = 0; i < currentWord.length; i++) {
+          if (playerLetters[i] === "" && currentWord[i] === letter) {
+            playerLetters[i] = letter;
+            placed = true;
+            placedIndex = i;
+            break;
+          }
+        }
+        
+        if (placed) {
+          // Добавляем действие в историю
+          actionHistory.push({letter: letter, index: placedIndex});
+          
+          playSound(sndCorrect);
+          showMessage("✅ Правильно!", "success");
+        } else {
+          playSound(sndWrong);
+          showMessage("❌ Неправильно! Эта буква не подходит", "error");
+        }
+        
+        renderBoxes();
+        checkFullWord();
+      }
+
+      // Функция отмены последнего действия
+      function undoLastAction() {
+        if (actionHistory.length === 0) return;
+        
+        const lastAction = actionHistory.pop();
+        playerLetters[lastAction.index] = "";
+        
+        renderBoxes();
+        showMessage("Отменено последнее действие", "info");
+      }
+
+      // Функция сброса текущего слова
+      function resetCurrentWord() {
+        playerLetters = new Array(currentWord.length).fill("");
+        actionHistory = [];
+        
+        renderBoxes();
+        showMessage("Слово сброшено", "info");
+      }
+
+      function showMessage(text, type) {
+        messageEl.textContent = text;
+        
+        switch(type) {
+          case "success":
+            messageEl.style.color = "#006600";
+            break;
+          case "error":
+            messageEl.style.color = "#990000";
+            break;
+          case "info":
+            messageEl.style.color = "#0066cc";
+            break;
+          default:
+            messageEl.style.color = "#333";
+        }
+        
+        // Автоматическое скрытие сообщения через 3 секунды
+        setTimeout(() => {
+          if (messageEl.textContent === text) {
+            messageEl.textContent = "";
+          }
+        }, 3000);
+      }
+
+      function checkFullWord() {
+        if (playerLetters.every((ch) => ch !== "") && !showFullWord) {
+          showFullWord = true;
+          fullWordStartTime = performance.now();
+          playSound(sndFirework);
+          startParticles();
+          
+          showMessage(`🎉 Отлично! Слово "${animals[currentIndex].name}" собрано!`, "success");
+          
+          // через 3 секунды — перейти к следующему слову
+          setTimeout(() => {
+            stopParticles();
+            nextWord();
+          }, 3000);
+        }
+      }
+
+      // Переход к следующему слову
+      function nextWord() {
         currentIndex = (currentIndex + 1) % animals.length;
-        currentWord = animals[currentIndex].name.split('');
-        playerLetters = new Array(currentWord.length).fill('');
+        currentWord = animals[currentIndex].name.split("");
+        playerLetters = new Array(currentWord.length).fill("");
+        actionHistory = [];
         showFullWord = false;
         renderAll();
-        messageEl.textContent = '';
-      }, 3000);
-    }
-  }
+        messageEl.textContent = "";
+      }
 
-  // ==== Звуки ====
-  function playSound(sound){
-    try {
-      // клонируем для одновременного воспроизведения
-      const snd = sound.cloneNode(true);
-      snd.play().catch(()=>{ /* mute policy */});
-    } catch(e){ console.warn('playSound error', e); }
-  }
+      // ==== Звуки ====
+      function playSound(sound) {
+        if (!soundsEnabled) return;
+        
+        try {
+          const snd = sound.cloneNode(true);
+          snd.volume = sound === audioBg ? 0.2 : 1.0;
+          snd.play().catch(() => {
+            // Игнорируем ошибки автовоспроизведения
+          });
+        } catch (e) {
+          console.warn("Ошибка воспроизведения звука", e);
+        }
+      }
 
-  // ==== Частицы (простая реализация) ====
-  function rand(min,max){ return Math.random()*(max-min)+min; }
+      function toggleSounds() {
+        soundsEnabled = !soundsEnabled;
+        soundToggle.textContent = soundsEnabled ? "🔊 Звуки вкл" : "🔇 Звуки выкл";
+        soundToggle.classList.toggle("active", soundsEnabled);
+        
+        if (!soundsEnabled) {
+          // Останавливаем все звуки эффектов
+          sndCorrect.pause();
+          sndWrong.pause();
+          sndFirework.pause();
+        }
+      }
 
-  function startParticles(){
-    particles = [];
-    particlesRunning = true;
-    // создаём частицы в центре canvas
-    const cx = canvas.width/2;
-    const cy = canvas.height/2;
-    for(let i=0;i<60;i++){
-      particles.push({
-        x: cx,
-        y: cy,
-        vx: rand(-6,6),
-        vy: rand(-10, -2),
-        life: rand(40,120),
-        size: Math.floor(rand(6,22)),
-        color: `rgb(${Math.floor(rand(0,255))},${Math.floor(rand(0,255))},${Math.floor(rand(0,255))})`,
-        char: ['*','✸','✦','★'][Math.floor(rand(0,4))]
+      function toggleMusic() {
+        musicEnabled = !musicEnabled;
+        musicToggle.textContent = musicEnabled ? "🎵 Музыка вкл" : "🎵 Музыка выкл";
+        musicToggle.classList.toggle("active", musicEnabled);
+        
+        if (musicEnabled) {
+          audioBg.play().catch(() => {});
+        } else {
+          audioBg.pause();
+        }
+      }
+
+      // ==== Частицы ====
+      function rand(min, max) {
+        return Math.random() * (max - min) + min;
+      }
+
+      function startParticles() {
+        particles = [];
+        particlesRunning = true;
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2;
+        for (let i = 0; i < 60; i++) {
+          particles.push({
+            x: cx,
+            y: cy,
+            vx: rand(-6, 6),
+            vy: rand(-10, -2),
+            life: rand(40, 120),
+            size: Math.floor(rand(6, 22)),
+            color: `rgb(${Math.floor(rand(0, 255))},${Math.floor(
+              rand(0, 255)
+            )},${Math.floor(rand(0, 255))})`,
+            char: ["*", "✸", "✦", "★"][Math.floor(rand(0, 4))],
+          });
+        }
+      }
+      
+      function stopParticles() {
+        particlesRunning = false;
+        particles = [];
+        clearCanvas();
+      }
+
+      function clearCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+      
+      function updateParticles() {
+        if (!particlesRunning) return;
+        clearCanvas();
+        for (let i = particles.length - 1; i >= 0; i--) {
+          const p = particles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.35;
+          p.life -= 1;
+          ctx.fillStyle = p.color;
+          ctx.font = `${p.size}px serif`;
+          ctx.fillText(p.char, p.x, p.y);
+          if (p.life <= 0) particles.splice(i, 1);
+        }
+        if (particles.length === 0) particlesRunning = false;
+      }
+
+      function loopParticles() {
+        updateParticles();
+        requestAnimationFrame(loopParticles);
+      }
+      loopParticles();
+
+      // ==== Рендер и привязки ====
+      function renderAll() {
+        loadAnimalImage();
+        renderBoxes();
+      }
+
+      // Вешаем обработчики на буквы
+      function bindAlphabetClicks() {
+        // Используем только один тип события для предотвращения двойных срабатываний
+        const handleLetterEvent = (e) => {
+          // Для touch событий предотвращаем стандартное поведение
+          if (e.type === 'touchstart') {
+            e.preventDefault();
+          }
+          
+          const letter = e.target.dataset.letter;
+          if (letter) handleLetterClick(letter);
+        };
+        
+        // Используем только touchstart для мобильных и click для десктопа
+        if ('ontouchstart' in window) {
+          // Мобильные устройства - используем только touchstart
+          alphabetBigDiv.addEventListener("touchstart", handleLetterEvent, { passive: false });
+          alphabetSmallDiv.addEventListener("touchstart", handleLetterEvent, { passive: false });
+        } else {
+          // Десктоп - используем click
+          alphabetBigDiv.addEventListener("click", handleLetterEvent);
+          alphabetSmallDiv.addEventListener("click", handleLetterEvent);
+        }
+      }
+
+      // Next button
+      nextBtn.addEventListener("click", nextWord);
+
+      // Кнопка отмены
+      undoBtn.addEventListener("click", undoLastAction);
+      
+      // Кнопка сброса
+      resetBtn.addEventListener("click", resetCurrentWord);
+
+      // Управление звуком
+      soundToggle.addEventListener("click", toggleSounds);
+      musicToggle.addEventListener("click", toggleMusic);
+
+      // Start button
+      startBtn.addEventListener("click", async () => {
+        try {
+          await audioBg.play().catch(() => {});
+          startBtn.disabled = true;
+          startBtn.textContent = "Игра запущена";
+        } catch (e) {
+          console.warn("Невозможно воспроизвести фоновую музыку", e);
+        }
       });
-    }
-  }
-  function stopParticles(){ particlesRunning = false; particles = []; clearCanvas(); }
 
-  function clearCanvas(){ ctx.clearRect(0,0,canvas.width,canvas.height); }
-  function updateParticles(){
-    if(!particlesRunning) return;
-    clearCanvas();
-    for(let i=particles.length-1;i>=0;i--){
-      const p = particles[i];
-      p.x += p.vx;
-      p.y += p.vy;
-      p.vy += 0.35; // gravity
-      p.life -= 1;
-      ctx.fillStyle = p.color;
-      ctx.font = `${p.size}px serif`;
-      ctx.fillText(p.char, p.x, p.y);
-      if(p.life<=0) particles.splice(i,1);
-    }
-    if(particles.length===0) particlesRunning=false;
-  }
+      // ==== Инициализация игры ====
+      renderAlphabet();
+      bindAlphabetClicks();
+      renderAll();
 
-  function loopParticles(){
-    updateParticles();
-    requestAnimationFrame(loopParticles);
-  }
-  loopParticles();
+      // Автообновление статуса
+      setInterval(() => {
+        placedCount.textContent = playerLetters.filter((x) => x !== "").length;
+      }, 200);
 
-  // ==== Рендер и привязки ====
-  function renderAll(){
-    loadAnimalImage();
-    renderBoxes();
-  }
-
-  // Вешаем обработчики на буквы (делегирование)
-  function bindAlphabetClicks(){
-    alphabetBigDiv.addEventListener('click', (e)=>{
-      const letter = e.target.dataset.letter;
-      if(letter) handleLetterClick(letter);
-    });
-    alphabetSmallDiv.addEventListener('click', (e)=>{
-      const letter = e.target.dataset.letter;
-      if(letter) handleLetterClick(letter);
-    });
-  }
-
-  // Next button
-  nextBtn.addEventListener('click', ()=>{
-    // переход к следующему слову вручную
-    currentIndex = (currentIndex + 1) % animals.length;
-    currentWord = animals[currentIndex].name.split('');
-    playerLetters = new Array(currentWord.length).fill('');
-    renderAll();
-    messageEl.textContent = '';
-  });
-
-  // Mute bg music
-  muteBg.addEventListener('change', (e)=>{
-    audioBg.muted = e.target.checked;
-  });
-
-  // Start button: нужно, чтобы разрешить воспроизведение музыки (политика браузера)
-  startBtn.addEventListener('click', async ()=>{
-    try{
-      await audioBg.play().catch(()=>{});
-      startBtn.disabled = true;
-      startBtn.textContent = 'Играть — запущено';
-    }catch(e){
-      console.warn('cannot play bg', e);
-    }
-  });
-
-  // ==== Начальные вызовы ====
-  renderAlphabet();
-  bindAlphabetClicks();
-  renderAll();
-
-  // Адаптация размеров canvas (под размер wrap)
-  window.addEventListener('load', resizeCanvas);
-  setTimeout(resizeCanvas,300);
-
-  // Запуск игрового цикла частиц (обработка частиц)
-  // (Particles loop already requested via loopParticles)
-
-  // Автообновление показываемого статуса (индикатор заполненности)
-  setInterval(()=>{
-    placedCount.textContent = playerLetters.filter(x=>x!=='').length;
-  }, 200);
-
-  // Прекращаем музыку при закрытии вкладки
-  window.addEventListener('beforeunload', ()=>{ audioBg.pause(); audioBg.currentTime=0; });
-
-  </script>
-</body>
+      // Остановка музыки при закрытии вкладки
+      window.addEventListener("beforeunload", () => {
+        audioBg.pause();
+        audioBg.currentTime = 0;
+      });
+    </script>
+  </body>
 </html>
