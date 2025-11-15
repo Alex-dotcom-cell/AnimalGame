@@ -3,39 +3,50 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Animal Letter Game – Deutsch (web)</title>
+    <title>Animal Letter Game – Deutsch</title>
     <style>
       :root {
-        --bg: #87cefa; /* BLUE_BG */
+        --bg: #87cefa;
         --black: #000;
         --gray: #c8c8c8;
         --dark-gray: #969696;
         --box-size: 48px;
         --letter-font-size: 32px;
+        --mobile-box-size: 40px;
+        --mobile-letter-font-size: 24px;
       }
-      html,
-      body {
+      
+      html, body {
         height: 100%;
         margin: 0;
         font-family: Arial, Helvetica, sans-serif;
         background: var(--bg);
+        overflow-x: hidden;
       }
+      
       .wrap {
         max-width: 1400px;
-        margin: 18px auto;
+        margin: 0 auto;
         padding: 12px;
+        box-sizing: border-box;
       }
+      
       header {
         display: flex;
         justify-content: space-between;
         align-items: center;
         margin-bottom: 12px;
+        flex-wrap: wrap;
       }
+      
       header h1 {
         margin: 0;
         font-size: 22px;
         color: #013a63;
+        flex: 1;
+        min-width: 200px;
       }
+      
       #startBtn {
         padding: 10px 14px;
         background: #0066cc;
@@ -43,39 +54,49 @@
         border-radius: 8px;
         border: none;
         cursor: pointer;
+        font-size: 16px;
       }
+      
       .game-area {
         display: flex;
         gap: 16px;
         align-items: flex-start;
       }
-      .left,
-      .right {
+      
+      .left, .right {
         background: rgba(255, 255, 255, 0.9);
         padding: 12px;
         border-radius: 10px;
         box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+        box-sizing: border-box;
       }
+      
       .left {
         flex: 1 1 640px;
-        min-width: 640px;
+        min-width: 0; /* Важно для правильного сжатия на мобильных */
       }
+      
       .right {
         width: 360px;
       }
+      
       .animal-image {
-        width: 400px;
-        height: 400px;
+        max-width: 100%;
+        height: auto;
+        max-height: 400px;
         object-fit: contain;
         display: block;
         margin: 6px auto;
       }
+      
       .boxes {
         display: flex;
         justify-content: center;
+        flex-wrap: wrap;
         gap: 8px;
         margin: 14px 0;
       }
+      
       .box {
         width: var(--box-size);
         height: var(--box-size);
@@ -87,13 +108,16 @@
         font-size: var(--letter-font-size);
         font-weight: 700;
       }
+      
       .alphabet {
         display: flex;
         flex-wrap: wrap;
         gap: 8px;
         padding: 12px;
         margin-top: 8px;
+        justify-content: center;
       }
+      
       .letter-btn {
         width: 40px;
         height: 40px;
@@ -105,46 +129,175 @@
         justify-content: center;
         cursor: pointer;
         user-select: none;
+        font-size: 20px;
+        font-weight: bold;
       }
-      .letter-btn:hover {
+      
+      .letter-btn:hover, .letter-btn:active {
         background: var(--dark-gray);
         color: white;
       }
+      
       .section-title {
         font-weight: 700;
         color: #054f85;
         margin-bottom: 8px;
+        font-size: 18px;
       }
+      
       .preview {
         min-height: 120px;
         padding: 8px;
         font-size: 14px;
         color: #222;
       }
+      
       .status {
         margin-top: 8px;
         font-weight: 600;
       }
+      
       canvas#particles {
         position: absolute;
         left: 0;
         top: 0;
         pointer-events: none;
+        z-index: 10;
       }
+      
       .footer {
         margin-top: 10px;
         color: #333;
         font-size: 14px;
       }
+      
+      /* Мобильные стили */
       @media (max-width: 1100px) {
         .game-area {
           flex-direction: column;
         }
-        .left {
-          min-width: unset;
-        }
+        
         .right {
           width: 100%;
+        }
+      }
+      
+      @media (max-width: 768px) {
+        .wrap {
+          padding: 8px;
+        }
+        
+        header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 10px;
+        }
+        
+        header h1 {
+          font-size: 18px;
+        }
+        
+        #startBtn {
+          width: 100%;
+          padding: 12px;
+          font-size: 18px;
+        }
+        
+        .left, .right {
+          padding: 10px;
+        }
+        
+        .animal-image {
+          max-height: 300px;
+        }
+        
+        .box {
+          width: var(--mobile-box-size);
+          height: var(--mobile-box-size);
+          font-size: var(--mobile-letter-font-size);
+        }
+        
+        .letter-btn {
+          width: 36px;
+          height: 36px;
+          font-size: 18px;
+        }
+        
+        .alphabet {
+          gap: 6px;
+          padding: 8px;
+        }
+        
+        .section-title {
+          font-size: 16px;
+        }
+        
+        .preview {
+          min-height: 100px;
+          font-size: 13px;
+        }
+        
+        #nextBtn {
+          width: 100%;
+          padding: 12px;
+          font-size: 16px;
+          margin-top: 10px;
+        }
+      }
+      
+      @media (max-width: 480px) {
+        .box {
+          width: 35px;
+          height: 35px;
+          font-size: 20px;
+        }
+        
+        .letter-btn {
+          width: 32px;
+          height: 32px;
+          font-size: 16px;
+        }
+        
+        .alphabet {
+          gap: 4px;
+        }
+        
+        .animal-image {
+          max-height: 250px;
+        }
+      }
+      
+      /* Улучшения для очень маленьких экранов */
+      @media (max-width: 360px) {
+        .box {
+          width: 30px;
+          height: 30px;
+          font-size: 18px;
+        }
+        
+        .letter-btn {
+          width: 28px;
+          height: 28px;
+          font-size: 14px;
+        }
+        
+        .alphabet {
+          gap: 3px;
+        }
+      }
+      
+      /* Улучшения для касаний на мобильных */
+      .letter-btn {
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+      }
+      
+      /* Улучшения доступности */
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
         }
       }
     </style>
@@ -152,8 +305,8 @@
   <body>
     <div class="wrap">
       <header>
-        <h1>Animal Letter Game – Deutsch (web)</h1>
-        <div>
+        <h1>Animal Letter Game – Deutsch</h1>
+        <div style="width: 100%;">
           <button id="startBtn">Start / Играть</button>
         </div>
       </header>
@@ -164,7 +317,7 @@
           id="particles"
           width="1600"
           height="1200"
-          style="width: 100%; height: 800px"
+          style="width: 100%; height: 100%; position: absolute; top: 0; left: 0;"
         ></canvas>
 
         <div class="game-area">
@@ -215,22 +368,22 @@
                   color: white;
                   border: none;
                   cursor: pointer;
+                  width: 100%;
+                  font-size: 16px;
                 "
               >
                 Следующее слово
               </button>
               <div style="margin-top: 10px">
                 <label
-                  ><input id="muteBg" type="checkbox" /> Отключить фон.
-                  музыку</label
+                  ><input id="muteBg" type="checkbox" /> Отключить фоновую музыку</label
                 >
               </div>
             </div>
 
             <div class="footer">
               <p>
-                Копия логики Pygame: кликай на буквы, чтобы заполнить клетки.
-                Если буква не подходит — играет неправильный звук.
+                Кликай на буквы, чтобы заполнить клетки. Если буква не подходит — играет неправильный звук.
               </p>
             </div>
           </div>
@@ -240,7 +393,6 @@
 
     <script>
       // ==== Конфигурация ====
-      // Путь к папке с ассетами (от index.html)
       const ASSETS_DIR = "./assets";
 
       // Алфавит
@@ -251,7 +403,7 @@
         .map((_, i) => String.fromCharCode(97 + i))
         .concat(["ä", "ö", "ü", "ß"]);
 
-      // Список животных и имён файлов (как в оригинале)
+      // Список животных
       const animals = [
         { name: "Affe", img: "Affe.png" },
         { name: "Katze", img: "Katze.png" },
@@ -262,11 +414,11 @@
         { name: "Qualle", img: "Qualle.png" },
         { name: "Osterhase", img: "Osterhase.png" },
         { name: "Igel", img: "Igel.png" },
-        { name: "Tisch", img: "Tisch .png" }, // оставлен как в твоём списке (обрати внимание на пробел)
+        { name: "Tisch", img: "Tisch .png" },
         { name: "Lampe", img: "Lampe.png" },
         { name: "Gabel", img: "Gabel.png" },
         { name: "Xylophon", img: "Xylophon.png" },
-        { name: "Junge", img: "Junde.png" }, // тоже оставлено как есть
+        { name: "Junge", img: "Junde.png" },
         { name: "Nase", img: "Nase.png" },
         { name: "Sonne", img: "Sonne.png" },
         { name: "Baum", img: "Baum.png" },
@@ -311,14 +463,17 @@
       const canvas = document.getElementById("particles");
       const ctx = canvas.getContext("2d");
 
-      // Resize canvas to full page size of wrap region
+      // Адаптация размера canvas
       function resizeCanvas() {
-        const rect = canvas.getBoundingClientRect();
+        const container = document.querySelector('.wrap');
+        const rect = container.getBoundingClientRect();
         canvas.width = rect.width;
         canvas.height = rect.height;
       }
+
       window.addEventListener("resize", resizeCanvas);
-      resizeCanvas();
+      window.addEventListener("load", resizeCanvas);
+      setTimeout(resizeCanvas, 300);
 
       // ==== Инициализация UI ====
       function renderAlphabet() {
@@ -328,14 +483,19 @@
           b.className = "letter-btn";
           b.textContent = letter;
           b.dataset.letter = letter;
+          b.setAttribute("role", "button");
+          b.setAttribute("aria-label", `Буква ${letter}`);
           alphabetBigDiv.appendChild(b);
         });
+        
         alphabetSmallDiv.innerHTML = "";
         lettersSmall.forEach((letter) => {
           const b = document.createElement("div");
           b.className = "letter-btn";
           b.textContent = letter;
           b.dataset.letter = letter;
+          b.setAttribute("role", "button");
+          b.setAttribute("aria-label", `Буква ${letter}`);
           alphabetSmallDiv.appendChild(b);
         });
       }
@@ -346,6 +506,7 @@
           const box = document.createElement("div");
           box.className = "box";
           box.textContent = ch || "";
+          box.setAttribute("aria-label", ch ? `Буква ${ch}` : "Пустая клетка");
           boxesContainer.appendChild(box);
         });
         currentWordPreview.textContent = currentWord.join("");
@@ -356,9 +517,8 @@
         const animal = animals[currentIndex];
         const path = ASSETS_DIR + "/" + animal.img;
         animalImg.src = path;
+        animalImg.alt = animal.name;
         animalImg.onerror = () => {
-          // если картинка не найдена — показываем плейсхолдер
-          animalImg.alt = animal.name;
           animalImg.style.background = "#fff";
         };
       }
@@ -392,10 +552,9 @@
           fullWordStartTime = performance.now();
           playSound(sndFirework);
           startParticles();
-          // через 3 секунды — перейти к следующему слову
+          
           setTimeout(() => {
             stopParticles();
-            // advance index
             currentIndex = (currentIndex + 1) % animals.length;
             currentWord = animals[currentIndex].name.split("");
             playerLetters = new Array(currentWord.length).fill("");
@@ -409,17 +568,16 @@
       // ==== Звуки ====
       function playSound(sound) {
         try {
-          // клонируем для одновременного воспроизведения
           const snd = sound.cloneNode(true);
           snd.play().catch(() => {
-            /* mute policy */
+            // Игнорируем ошибки автовоспроизведения
           });
         } catch (e) {
-          console.warn("playSound error", e);
+          console.warn("Ошибка воспроизведения звука", e);
         }
       }
 
-      // ==== Частицы (простая реализация) ====
+      // ==== Частицы ====
       function rand(min, max) {
         return Math.random() * (max - min) + min;
       }
@@ -427,7 +585,6 @@
       function startParticles() {
         particles = [];
         particlesRunning = true;
-        // создаём частицы в центре canvas
         const cx = canvas.width / 2;
         const cy = canvas.height / 2;
         for (let i = 0; i < 60; i++) {
@@ -445,6 +602,7 @@
           });
         }
       }
+      
       function stopParticles() {
         particlesRunning = false;
         particles = [];
@@ -454,6 +612,7 @@
       function clearCanvas() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
+      
       function updateParticles() {
         if (!particlesRunning) return;
         clearCanvas();
@@ -461,7 +620,7 @@
           const p = particles[i];
           p.x += p.vx;
           p.y += p.vy;
-          p.vy += 0.35; // gravity
+          p.vy += 0.35;
           p.life -= 1;
           ctx.fillStyle = p.color;
           ctx.font = `${p.size}px serif`;
@@ -483,21 +642,34 @@
         renderBoxes();
       }
 
-      // Вешаем обработчики на буквы (делегирование)
+      // Вешаем обработчики на буквы
       function bindAlphabetClicks() {
         alphabetBigDiv.addEventListener("click", (e) => {
           const letter = e.target.dataset.letter;
           if (letter) handleLetterClick(letter);
         });
+        
         alphabetSmallDiv.addEventListener("click", (e) => {
           const letter = e.target.dataset.letter;
           if (letter) handleLetterClick(letter);
         });
+        
+        // Обработка касаний для мобильных устройств
+        alphabetBigDiv.addEventListener("touchstart", (e) => {
+          e.preventDefault();
+          const letter = e.target.dataset.letter;
+          if (letter) handleLetterClick(letter);
+        }, { passive: false });
+        
+        alphabetSmallDiv.addEventListener("touchstart", (e) => {
+          e.preventDefault();
+          const letter = e.target.dataset.letter;
+          if (letter) handleLetterClick(letter);
+        }, { passive: false });
       }
 
       // Next button
       nextBtn.addEventListener("click", () => {
-        // переход к следующему слову вручную
         currentIndex = (currentIndex + 1) % animals.length;
         currentWord = animals[currentIndex].name.split("");
         playerLetters = new Array(currentWord.length).fill("");
@@ -510,39 +682,48 @@
         audioBg.muted = e.target.checked;
       });
 
-      // Start button: нужно, чтобы разрешить воспроизведение музыки (политика браузера)
+      // Start button
       startBtn.addEventListener("click", async () => {
         try {
           await audioBg.play().catch(() => {});
           startBtn.disabled = true;
-          startBtn.textContent = "Играть — запущено";
+          startBtn.textContent = "Игра запущена";
         } catch (e) {
-          console.warn("cannot play bg", e);
+          console.warn("Невозможно воспроизвести фоновую музыку", e);
         }
       });
 
-      // ==== Начальные вызовы ====
+      // ==== Инициализация игры ====
       renderAlphabet();
       bindAlphabetClicks();
       renderAll();
 
-      // Адаптация размеров canvas (под размер wrap)
-      window.addEventListener("load", resizeCanvas);
-      setTimeout(resizeCanvas, 300);
-
-      // Запуск игрового цикла частиц (обработка частиц)
-      // (Particles loop already requested via loopParticles)
-
-      // Автообновление показываемого статуса (индикатор заполненности)
+      // Автообновление статуса
       setInterval(() => {
         placedCount.textContent = playerLetters.filter((x) => x !== "").length;
       }, 200);
 
-      // Прекращаем музыку при закрытии вкладки
+      // Остановка музыки при закрытии вкладки
       window.addEventListener("beforeunload", () => {
         audioBg.pause();
         audioBg.currentTime = 0;
       });
+
+      // Предотвращение масштабирования при двойном тапе на мобильных
+      document.addEventListener('touchstart', function(e) {
+        if (e.touches.length > 1) {
+          e.preventDefault();
+        }
+      }, { passive: false });
+
+      let lastTouchEnd = 0;
+      document.addEventListener('touchend', function(e) {
+        const now = (new Date()).getTime();
+        if (now - lastTouchEnd <= 300) {
+          e.preventDefault();
+        }
+        lastTouchEnd = now;
+      }, false);
     </script>
   </body>
 </html>
